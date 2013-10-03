@@ -1,0 +1,56 @@
+内核自带文件系统
+load tftp://192.168.0.3/vmlinux ; g  console=tty console=ttyS0,115200 root=/dev/ram rw maxcpus=1  mem=256m
+其中pc上文件系统路径
+/home/xy/bnc243_dual3a/fs/media/disk/home/loongson/busybox/rootfs
+
+
+起硬盘文件系统
+set al "load /dev/fs/ext2@wd0/boot/vmlinux "
+set append "console=tty  root=/dev/sda1 rw  "
+set bootdelay 3
+
+load tftp://192.168.0.3/vmlinux ; g  console=tty console=ttyS0,115200 rootfstype=ext4 root=/dev/sdb1 rw  maxcpus=2 mem=256m
+
+
+目前需要停止并永久关闭irqbalance服务，多核才更不容易崩溃
+service irqbalance stop; chkconfig --level 123456 irqbalance off
+
+set ifconfig em0:192.168.0.4
+
+以下脚本应该加入/etc/rc.loacl,自动生成can的设备节点
+dnumber=`cat /proc/devices |grep rtd-ecan1000|cut -f 1 -d" "`
+echo "pci9030 --> dual sja1000 device number ${dnumber}"
+mknod /dev/rtd-ecan1000-0 c ${dnumber} 0 ;
+mknod /dev/rtd-ecan1000-1 c  ${dnumber} 1;
+chmod 777 /dev/rtd-ecan1000-0; 
+chmod 777 /dev/rtd-ecan1000-1;
+
+
+挂载一个大的内存文件系统用于测试
+mount -t tmpfs -o size=1600m tmpfs /mnt/disk/
+
+
+解压文件系统
+tar --numeric-owner -lzxvf xxx.tar.gz -C $userDir
+
+
+---------------------------硬盘测速-----------------
+[root@localhost ~]# time dd if=/dev/zero of=/mnt/sd/300m bs=1024 count=300000
+记录了300000+0 的读入
+记录了300000+0 的写出
+307200000字节(307 MB)已复制，8.3644 秒，36.7 MB/秒
+
+real    0m8.378s
+user    0m0.508s
+sys     0m7.836s
+[root@localhost ~]# time dd if=/dev/zero of=/300m bs=1024 count=300000
+记录了300000+0 的读入
+记录了300000+0 的写出
+307200000字节(307 MB)已复制，7.38725 秒，41.6 MB/秒
+
+real    0m7.401s
+user    0m0.472s
+sys     0m6.832s
+---------------------------硬盘测速结束-----------------
+55号 启3核  mc1
+59号同上
