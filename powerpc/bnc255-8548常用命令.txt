@@ -1,0 +1,20 @@
+setenv ipaddr 192.168.0.4 ; setenv serverip 192.168.0.3
+
+protect off all ;tftp 200000 u-boot.bin ;erase fff80000 ffffffff;cp.b 200000 fff80000  $filesize
+
+tftp 200000 uImage;erase ffc00000 ffdfffff;cp.b 200000 ffc00000 $filesize;
+tftp 200000 8548.dtb;erase ffe00000 +$filesize;cp.b 200000 ffe00000 $filesize;
+
+  tftp 200000 uImage;erase ffc00000 ffdfffff;cp.b 200000 ffc00000 $filesize; tftp 200000 8548.dtb;erase ffe00000 +$filesize;cp.b 200000 ffe00000 $filesize;tftp 200000  rootfs-8548-ltib.jffs2;erase fc000000 ffbfffff ; cp.b 200000 fc000000  $filesize;boot
+  
+  
+  setenv  bootargs root=/dev/mtdblock0 rootfstype=jffs2 init=/linuxrc console=ttyS0,115200 rw;setenv bootcmd bootm ffc00000 - ffe00000 ;saveenv
+  
+  
+  ¿ìËÙ
+  tftp 200000 uImage;  setenv  bootargs root=/dev/mtdblock0 rootfstype=jffs2 init=/linuxrc console=ttyS0,115200 rw;bootm 200000 - ffe00000 
+  
+  setenv ethaddr 02:E0:0C:00:00:57;
+  setenv eth1addr 02:E0:0C:00:10:57;
+  setenv eth2addr 02:E0:0C:00:20:57;
+  setenv eth3addr 02:E0:0C:00:30:57;
