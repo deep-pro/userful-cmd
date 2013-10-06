@@ -1,0 +1,71 @@
+
+
+setenv ipaddr 192.168.0.4 ; setenv serverip 192.168.0.3
+setenv ipaddr 192.168.0.5 ; setenv serverip 192.168.0.3
+
+setenv  bootargs root=/dev/mtdblock1 rootfstype=jffs2 init=/linuxrc console=ttyS0,115200 rw;setenv bootcmd bootm ffc00000 - ffe00000 ;saveenv
+
+date 022209392013
+setenv  bootargs root=/dev/mtdblock1 rootfstype=jffs2 init=/linuxrc console=ttyS0,115200 rw;setenv bootcmd bootm ffc00000 - ffe00000 ;
+setenv  bootargs root=/dev/mtdblock0 rootfstype=jffs2 init=/linuxrc console=ttyS0,115200 rw;setenv bootcmd bootm ffc00000 - ffe00000 ;
+ 
+ 
+protect off all ;tftp 200000 u-boot.bin ;erase fff80000 ffffffff;cp.b 200000 fff80000  $filesize
+
+ ./dtc -O dtb -o ~/8548.dtb -b 0 -p 1024 arch/powerpc/boot/dts/bnc8548.dts 
+ 
+ ./arch/powerpc/boot/dtc -O dtb -o ~/8548.dtb -b 0 -p 1024 arch/powerpc/boot/dts/bnc8548.dts     
+ 
+ tftp 200000 uImage;erase ffc00000 ffdfffff;cp.b 200000 ffc00000 $filesize; tftp 200000 8548.dtb;erase ffe00000 +$filesize;cp.b 200000 ffe00000 $filesize;tftp 200000 rootfs-extend-54suo.jffs2;erase fc000000 ffbfffff ; cp.b 200000 fc000000  $filesize;boot
+
+ tftp 200000 rootfs-brctl.jffs2;erase fc000000 ffbfffff ; cp.b 200000 fc000000  $filesize;boot
+ 
+ 
+  tftp 200000 uImage;erase ffc00000 ffdfffff;cp.b 200000 ffc00000 $filesize; tftp 200000 8548.dtb;erase ffe00000 +$filesize;cp.b 200000 ffe00000 $filesize;tftp 200000  rootfs-8548-ltib.jffs2;erase fc000000 ffbfffff ; cp.b 200000 fc000000  $filesize;boot
+
+  -------------
+ tftp 200000 uImage;setenv  bootargs root=/dev/mtdblock0 rootfstype=jffs2 init=/linuxrc console=ttyS0,115200 rw; bootm 200000 - ffe00000 ;
+  
+  
+  mknod /dev/rtd-ecan1000-0 c 253 0 ;chmod 777 /dev/rtd-ecan1000-0; 
+
+erase ffe00000 ffefffff;tftp 200000 8548.dtb; cp.b 200000 ffe00000 $filesize
+tftp 200000 rootfs-extend-54suo.jffs2;erase fc000000 ffbfffff ; cp.b 200000 fc000000  $filesize
+tftp 200000 rootfs-8548-ltib.jffs2;erase fc000000 ffbfffff ; cp.b 200000 fc000000  $filesize
+
+protect off all ;tftp 200000 u-boot.bin ;erase fff80000 ffffffff;cp.b 200000 fff80000  $filesize
+//bnc8548±∏”√uboot
+tftp 200000 u-boot.bin ;erase fbf80000 fbffffff;cp.b 200000 fbf80000 80000
+
+ tftp 200000 uImage;erase ffc00000 ffdfffff;cp.b 200000 ffc00000 $filesize; tftp 200000 8548.dtb;erase ffe00000 +$filesize;cp.b 200000 ffe00000 $filesize;
+
+setenv ipaddr 192.168.0.3;setenv serverip 192.168.0.2
+printk("------------------------%s %d\n",__FILE__,__LINE__);
+
+ifconfig eth0 down;ifconfig eth2 192.168.0.3;
+tftp -g -r pci9056_localbus.ko 192.168.0.2;
+tftp -g -r crc-ccitt.ko 192.168.0.2 ;
+tftp -g -r eoc.ko 192.168.0.2 ;
+tftp -g -r br3.sh 192.168.0.2 ;
+tftp -g -r iperf 192.168.0.2 ;
+
+ifconfig eth0 down;ifconfig eth2 192.168.0.5;tftp -g -r pci9056_localbus.ko 192.168.0.2;tftp -g -r crc-ccitt.ko 192.168.0.2 ;tftp -g -r eco.ko 192.168.0.2 ;tftp -g -r br5.sh 192.168.0.2 ;
+
+
+./iperf -s -u -i 1 -f m -p 5000
+ 
+./iperf -c 192.168.1.5 -u -i 1 -f m -p 5000 -t 90 -b 130m -l 710
+./iperf -c 192.168.1.5 -u -i 1 -f m -p 5000 -t 90 -b 150m 
+./iperf -c 192.168.1.3 -u -i 1 -f m -p 5000 -t 90 -b 10m -l 710
+
+
+./iperf -s -i 1 -f m -p 5000 
+
+./iperf -c 192.168.1.5 -i 1 -f m -p 5000 -t 90 
+
+./iperf -c 192.168.1.3 -i 1 -f m -p 5000 -t 90 
+
+
+./iperf -c 192.168.0.234 -i 1 -f m -p 5000 -t 90 
+
+mkfs.jffs2 -r ./rootfs -e 0x20000 -n -b -o rootfs.jffs2
